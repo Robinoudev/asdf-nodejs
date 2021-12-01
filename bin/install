@@ -59,23 +59,27 @@ install_canon_version() {
   # we don't want to disturb current working dir
   (
     if [ "$install_type" != "version" ]; then
-      tar zxf "$archive_path" -C "$install_path" --strip-components=1 || exit 1
+      tar -xzf- "$archive_path" -C "$install_path" || exit 1
       cd "$install_path" || exit 1
 
       local configure_options
       configure_options="$(construct_configure_options "$install_path")"
 
       # shellcheck disable=SC2086
+
+      # TODO(robin): ./configure does not work anymore after removing
+      # --strip-components (probably because everything is nested in
+      # subdirectories now)
       ./configure $configure_options || exit 1
-      make $make_flags || exit 1
-      make $make_flags install || exit 1
+      gmake $make_flags || exit 1
+      gmake $make_flags install || exit 1
 
       if [ $? -ne 0 ]; then
         rm -rf "$install_path"
         exit 1
       fi
     else
-      tar zxf "$archive_path" -C "$install_path" --strip-components=1 || exit 1
+      tar -xzf- "$archive_path" -C "$install_path" || exit 1
     fi
   )
 }
